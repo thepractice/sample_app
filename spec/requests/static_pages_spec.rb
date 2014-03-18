@@ -7,6 +7,10 @@ describe 'Static pages' do
   shared_examples_for 'all static pages' do
     it { should have_selector('h1', text: heading) }
     it { should have_title(full_title(page_title)) }
+    it { should_not have_link('Users') }
+    it { should_not have_link('Profile') }
+    it { should_not have_link('Settings') }
+    it { should_not have_link('Sign out') }
   end
 
   describe 'Home page' do
