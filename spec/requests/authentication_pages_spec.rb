@@ -60,6 +60,18 @@ describe "Authentication" do
             expect(page).to have_title('Edit user')
           end
         end
+
+        describe "after signing out and then signing back in" do
+          before do
+            click_link "Sign out"
+            visit signin_path
+            sign_in user
+          end
+
+          it "should render profile instead of forwarding" do
+            expect(page).to have_title(user.name)
+          end
+        end
       end
 
       describe "in the Users controller" do
@@ -122,6 +134,18 @@ describe "Authentication" do
       describe "submitting a DELETE request to the Users#destroy action" do
         before { delete user_path(user) }
         specify { expect(response).to redirect_to(root_url) }
+      end
+    end
+
+    describe "as admin user" do
+      let(:admin) { FactoryGirl.create(:admin) }
+
+      before { sign_in admin, no_capybara: true }
+
+      describe "submitting a DELETE request on himself" do
+        it "should not delete himself" do
+         expect { delete user_path(admin) }.not_to change(User, :count)
+        end
       end
     end
   end
