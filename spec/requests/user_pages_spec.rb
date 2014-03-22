@@ -66,23 +66,46 @@ describe 'User pages' do
       it { should have_content(m1.content) }
       it { should have_content(m2.content) }
       it { should have_content(user.microposts.count) }
-    end
 
-    it "should have correct micropost count" do
-      expect(page).to have_content("Microposts (2)")
-    end
-
-    describe "pagination" do
-      before do
-        31.times { FactoryGirl.create(:micropost, user: user) }
-        visit user_path(user)
+      it "should have correct micropost count" do
+        expect(page).to have_content("Microposts (2)")
       end
 
-      it { should have_selector('div.pagination') }
+      describe "pagination" do
+        before do
+          31.times { FactoryGirl.create(:micropost, user: user) }
+          visit user_path(user)
+        end
 
-      it "should list first page of microposts" do
-        user.microposts.paginate(page: 1).each do |micropost|
-          expect(page).to have_content(micropost.content)
+        it { should have_selector('div.pagination') }
+
+        it "should list first page of microposts" do
+          user.microposts.paginate(page: 1).each do |micropost|
+            expect(page).to have_content(micropost.content)
+          end
+        end
+      end
+
+      describe "delete links" do
+        it { should_not have_link('delete') }
+
+        describe "as incorrect user" do
+          let(:wrong_user) { FactoryGirl.create(:user, email: 'wrong@example.com') }
+          before do
+            sign_in wrong_user
+            visit user_path(user)
+          end
+
+          it { should_not have_link('delete') }
+        end
+
+        describe "as correct user" do
+          before do
+            sign_in user
+            visit user_path(user)
+          end
+
+          it { should have_link('delete') }
         end
       end
     end
